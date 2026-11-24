@@ -37,3 +37,4 @@ pub use update::{
     UpdateOptions, cache_file, clear_cache, load_cache, save_cache, update_model_cache,
 };
 // tmp-ci-run: throwaway line so the path filter starts CI on this branch
+// tmp-ci-run: second throwaway line, the macOS test job of the first run never got a runner

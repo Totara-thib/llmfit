@@ -1,0 +1,30 @@
+name: tmp lock mismatch
+
+# Throwaway check, lives on the tmp-ci-run-2 branch only. This workflow is
+# onboarded in actions.lock for its checkout step alone. The setup-python
+# reference below was added AFTER the lock run, on purpose, to see what the
+# runner does with a reference the lockfile does not know. EXPECTED TO FAIL.
+
+on:
+  push:
+    branches: [tmp-ci-run-2]
+
+permissions:
+  contents: read
+
+jobs:
+  mismatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: A plain step before the unknown reference
+        run: echo "this step ran"
+
+      - name: Reference added after the lock run
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'

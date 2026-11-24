@@ -1,0 +1,33 @@
+name: tmp weekly rust step
+
+# Throwaway check, lives on the tmp-ci-run-2 branch only. It runs the Rust
+# step of weekly-model-update.yml as written and the two cargo test commands
+# that follow it there. No secret, no scrape, no pull request.
+
+on:
+  push:
+    branches: [tmp-ci-run-2]
+
+permissions:
+  contents: read
+
+jobs:
+  weekly-rust-step:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Rust
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Validate catalog schema and known hybrid KV
+        run: cargo test -p llmfit-core hf_models_
+
+      - name: Calibrate estimates against measured benchmarks
+        run: cargo test -p llmfit-core test_estimate_tps_calibration -- --nocapture

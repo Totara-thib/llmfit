@@ -36,3 +36,4 @@ pub use providers::{
 pub use update::{
     UpdateOptions, cache_file, clear_cache, load_cache, save_cache, update_model_cache,
 };
+// tmp-ci-run: throwaway line so the path filter starts CI on this branch

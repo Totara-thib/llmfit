@@ -1,0 +1,92 @@
+name: tmp rustup steps
+
+# Throwaway check, lives on the tmp-ci-run branch only. It runs the three
+# toolchain steps of release.yml and release-desktop.yml as written, on the
+# same runners and targets, and nothing else: no build, no publish.
+
+on:
+  push:
+    branches: [tmp-ci-run]
+
+permissions:
+  contents: read
+
+jobs:
+  release-build-step:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: riscv64gc-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Rust toolchain
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update --target ${{ matrix.target }}
+          rustup default stable
+
+      - name: Show what is installed
+        shell: bash
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
+          cargo --version
+          echo "CARGO_HOME=${CARGO_HOME:-unset}"
+          command -v cargo
+          rustup target list --installed
+          rustup target list --installed | grep -Fx "${{ matrix.target }}"
+
+  publish-crate-step:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - name: Show what is installed
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
+          cargo --version
+          echo "CARGO_HOME=${CARGO_HOME:-unset}"
+          command -v cargo
+
+  desktop-build-step:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    runs-on: macos-latest
+    steps:
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update --target ${{ matrix.target }}
+          rustup default stable
+
+      - name: Show what is installed
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
+          cargo --version
+          echo "CARGO_HOME=${CARGO_HOME:-unset}"
+          command -v cargo
+          rustup target list --installed | grep -Fx "${{ matrix.target }}"

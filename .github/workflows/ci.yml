@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main    # Run after merging into the "main" target
+      - tmp-ci-run
     paths:      # Run only if files relevant to CI have changed (i.e. not install.sh, scripts or .github/workflows)
       - 'llmfit-*/**'
       # Listed separately: workflow path filters have no brace expansion.
